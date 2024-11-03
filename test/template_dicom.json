@@ -1,0 +1,58 @@
+PUT _index_template/template_dicom
+{
+  "template": {
+    "mappings": {
+      "_routing": {
+        "required": false
+      },
+      "numeric_detection": false,
+      "dynamic": true,
+      "_source": {
+        "excludes": [],
+        "includes": [],
+        "enabled": true
+      },
+      "dynamic_templates": [],
+      "date_detection": false,
+      "properties": {
+        "StudyID": {
+          "type": "keyword"
+        },
+        "PatientSex": {
+          "type": "keyword"
+        },
+        "PatientID": {
+          "type": "keyword"
+        },
+        "StudyDescription": {
+          "type": "text"
+        },
+        "StudyInstanceUID": {
+          "type": "keyword"
+        },
+        "PatientName": {
+            "properties": {
+            "Alphabetic": {
+                "type": "text",
+                "fields": {
+                "suggest": {
+                    "type": "search_as_you_type",
+                    "doc_values": false,
+                    "max_shingle_size": 3
+                }
+                }
+            }
+            }
+        },
+        "AccessionNumber": {
+          "type": "keyword"
+        }
+      },
+      "subobjects": true
+    }
+  },
+  "index_patterns": [
+    "dicom"
+  ],
+  "composed_of": []
+}

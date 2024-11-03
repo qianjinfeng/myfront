@@ -1,101 +1,130 @@
-import Image from "next/image";
+'use client'
+
+import React from "react";
+import ElasticsearchAPIConnector from "@elastic/search-ui-elasticsearch-connector";
+import { SearchDriver } from "@elastic/search-ui";
+import {
+  ErrorBoundary,
+  Facet,
+  SearchProvider,
+  SearchBox,
+  Results,
+  PagingInfo,
+  ResultsPerPage,
+  Paging,
+  Sorting,
+  WithSearch
+} from "@elastic/react-search-ui";
+import { Layout } from "@elastic/react-search-ui-views";
+import "@elastic/react-search-ui-views/lib/styles/styles.css";
+
+const connector = new ElasticsearchAPIConnector({
+  host: "http://localhost:9200",
+  index: "dicom",
+  apiKey: "SHlxdzRwSUJITEdvSlBXeUFzZFA6aFkzYkRWTDVSMDY0cmdKU2U4am5mUQ=="
+});
+
+const config = {
+  searchQuery: {
+    search_fields: {
+      StudyDescription: {}
+    },
+    result_fields: {
+      // PatientName.Alphabetic:{
+      //   raw: {}
+      // },
+      StudyDescription:{
+        raw: {}
+      },
+      StudyInstanceUID: {
+        snippet: {}
+      }
+    },
+    disjunctiveFacets: ["PatientSex"],
+    facets: {
+      "PatientSex": {type: "value"}
+    }
+  },
+  autocompleteQuery: {
+    results: {
+      resultsPerPage: 5,
+      search_fields: {
+        "PatientName.Alphabetic": {
+          weight: 3
+        }
+      },
+      result_fields: {
+        PatientName_Alphabetic: {
+          snippet: {
+            size: 100,
+            fallback: true
+          }
+        },
+        StudyInstanceUID: {
+          raw: {}
+        }
+      }
+    },
+    suggestions: {
+      types: {
+        results: { fields: ["PatientName_Alphabetic"] }
+      },
+      size: 4
+    }
+  },
+  apiConnector: connector,
+  alwaysSearchOnInitialLoad: true
+};
+
+const driver = new SearchDriver(config);
+
+driver.subscribeToStateChanges((state) =>
+  console.log(`Received ${state.totalResults} results for your search!`)
+);
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <SearchProvider config={config}>
+    <WithSearch mapContextToProps={({ wasSearched }) => ({ wasSearched })}>
+      {({ wasSearched }) => {
+        return (
+          <div className="App">
+            <ErrorBoundary>
+              <Layout
+                header={
+                  <SearchBox
+                    autocompleteMinimumCharacters={3}
+                    autocompleteResults={{
+                      linkTarget: "_blank",
+                      sectionTitle: "Results",
+                      titleField: "PatientName",
+                      urlField: "SOPInstanceUID",
+                      shouldTrackClickThrough: true
+                    }}
+                    autocompleteSuggestions={true}
+                    debounceLength={0}
+                  />
+                }
+                sideContent={
+                  <div>
+                    {wasSearched && <Sorting label={"Sort by"} sortOptions={[]} />}
+                    <Facet key={"1"} field={"PatientSex"} label={"Sex"} />
+                  </div>
+                }
+                bodyContent={<Results shouldTrackClickThrough={true} />}
+                bodyHeader={
+                  <React.Fragment>
+                    {wasSearched && <PagingInfo />}
+                    {wasSearched && <ResultsPerPage />}
+                  </React.Fragment>
+                }
+                bodyFooter={<Paging />}
+              />
+            </ErrorBoundary>
+          </div>
+          );
+        }}
+      </WithSearch>
+    </SearchProvider>
   );
 }
