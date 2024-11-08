@@ -1,0 +1,82 @@
+PUT _index_template/template_dicom
+{
+  "template": {
+    "settings": {
+      "analysis": {
+        "analyzer": {
+          "pinyin_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": ["pinyin"]
+          }
+        },
+        "filter": {
+          "pinyin": {
+            "type": "pinyin",
+            "keep_separate_first_letter": true,
+            "keep_full_pinyin": true,
+            "keep_original": true,
+            "limit_first_letter_length": 16,
+            "lowercase": true
+          }
+        }
+      }
+    },
+    "mappings": {
+      "_routing": {
+        "required": false
+      },
+      "numeric_detection": false,
+      "dynamic": true,
+      "_source": {
+        "excludes": [],
+        "includes": [],
+        "enabled": true
+      },
+      "dynamic_templates": [],
+      "date_detection": false,
+      "properties": {
+        "StudyID": {
+          "type": "keyword"
+        },
+        "name": {
+            "type": "text",
+            "analyzer": "pinyin_analyzer",
+            "fields": {
+                "suggest": {
+                    "type": "search_as_you_type",
+                    "analyzer": "pinyin_analyzer"
+                }
+            }
+        },
+        "PatientSex": {
+          "type": "keyword"
+        },
+        "PatientID": {
+          "type": "keyword"
+        },
+        "PatientAge": {
+            "type": "text"
+        },
+        "StudyDescription": {
+          "type": "text"
+        },
+        "StudyInstanceUID": {
+          "type": "keyword"
+        },
+        "StudyDate": {
+            "type": "date",
+            "format": "basic_date"
+        },
+        "AccessionNumber": {
+          "type": "keyword"
+        }
+      },
+      "subobjects": true
+    }
+  },
+  "index_patterns": [
+    "dicom"
+  ],
+  "composed_of": []
+}

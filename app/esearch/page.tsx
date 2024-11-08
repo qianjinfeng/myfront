@@ -18,6 +18,7 @@ import {
 import { Layout } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
 
+
 const connector = new ElasticsearchAPIConnector({
   host: "http://localhost:9200",
   index: "dicom",
@@ -27,12 +28,14 @@ const connector = new ElasticsearchAPIConnector({
 const config = {
   searchQuery: {
     search_fields: {
-      StudyDescription: {}
+      StudyDescription: {},
+      name: {},
+      AccessionNumber: {}
     },
     result_fields: {
-      // PatientName.Alphabetic:{
-      //   raw: {}
-      // },
+      name:{
+        raw: {}
+      },
       StudyDescription:{
         raw: {}
       },
@@ -49,12 +52,12 @@ const config = {
     results: {
       resultsPerPage: 5,
       search_fields: {
-        "PatientName.Alphabetic": {
+        "name": {
           weight: 3
         }
       },
       result_fields: {
-        PatientName_Alphabetic: {
+        name: {
           snippet: {
             size: 100,
             fallback: true
@@ -67,7 +70,7 @@ const config = {
     },
     suggestions: {
       types: {
-        results: { fields: ["PatientName_Alphabetic"] }
+        results: { fields: ["name"] }
       },
       size: 4
     }
@@ -97,8 +100,8 @@ export default function Home() {
                     autocompleteResults={{
                       linkTarget: "_blank",
                       sectionTitle: "Results",
-                      titleField: "PatientName",
-                      urlField: "SOPInstanceUID",
+                      titleField: "name",
+                      urlField: "StudyInstanceUID",
                       shouldTrackClickThrough: true
                     }}
                     autocompleteSuggestions={true}
