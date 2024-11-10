@@ -26,6 +26,7 @@ const connector = new ElasticsearchAPIConnector({
 });
 
 const config = {
+  debug: true,
   searchQuery: {
     search_fields: {
       StudyDescription: {},
@@ -34,7 +35,10 @@ const config = {
     },
     result_fields: {
       name:{
-        raw: {}
+        snippet: {
+          size: 100,
+          fallback: true
+        }
       },
       StudyDescription:{
         raw: {}
@@ -51,26 +55,20 @@ const config = {
   autocompleteQuery: {
     results: {
       resultsPerPage: 5,
-      search_fields: {
-        "name": {
-          weight: 3
-        }
-      },
+      // search_fields: {
+      //   "name": {
+      //     weight: 3
+      //   }
+      // },
       result_fields: {
         name: {
-          snippet: {
-            size: 100,
-            fallback: true
-          }
-        },
-        StudyInstanceUID: {
           raw: {}
         }
       }
     },
     suggestions: {
       types: {
-        results: { fields: ["name"] }
+        "documents": { fields: ["name.suggest"] }
       },
       size: 4
     }
@@ -96,16 +94,16 @@ export default function Home() {
               <Layout
                 header={
                   <SearchBox
-                    autocompleteMinimumCharacters={3}
-                    autocompleteResults={{
-                      linkTarget: "_blank",
-                      sectionTitle: "Results",
-                      titleField: "name",
-                      urlField: "StudyInstanceUID",
-                      shouldTrackClickThrough: true
-                    }}
+                    autocompleteMinimumCharacters={2}
+                    // autocompleteResults={{
+                    //   linkTarget: "_blank",
+                    //   sectionTitle: "Results",
+                    //   titleField: "name",
+                    //   urlField: "StudyInstanceUID",
+                    //   shouldTrackClickThrough: true
+                    // }}
                     autocompleteSuggestions={true}
-                    debounceLength={0}
+                    debounceLength={200}
                   />
                 }
                 sideContent={

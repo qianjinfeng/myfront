@@ -1,82 +1,122 @@
 PUT _index_template/template_dicom
-{
-  "template": {
-    "settings": {
-      "analysis": {
-        "analyzer": {
-          "pinyin_analyzer": {
-            "type": "custom",
-            "tokenizer": "standard",
-            "filter": ["pinyin"]
-          }
-        },
-        "filter": {
-          "pinyin": {
-            "type": "pinyin",
-            "keep_separate_first_letter": true,
-            "keep_full_pinyin": true,
-            "keep_original": true,
-            "limit_first_letter_length": 16,
-            "lowercase": true
+
+  {
+    "template": {
+      "settings": {
+        "index": {
+          "analysis": {
+            "filter": {
+              "pinyin": {
+                "ignore_pinyin_offset": "true",
+                "lowercase": "true",
+                "keep_original": "true",
+                "keep_separate_first_letter": "false",
+                "type": "pinyin",
+                "limit_first_letter_length": "16",
+                "keep_full_pinyin": "true"
+              }
+            },
+            "analyzer": {
+              "pinyin_analyzer": {
+                "filter": [
+                  "pinyin"
+                ],
+                "type": "custom",
+                "tokenizer": "standard"
+              }
+            }
+          },
+          "routing": {
+            "allocation": {
+              "include": {
+                "_tier_preference": "data_content"
+              }
+            }
           }
         }
-      }
-    },
-    "mappings": {
-      "_routing": {
-        "required": false
       },
-      "numeric_detection": false,
-      "dynamic": true,
-      "_source": {
-        "excludes": [],
-        "includes": [],
-        "enabled": true
-      },
-      "dynamic_templates": [],
-      "date_detection": false,
-      "properties": {
-        "StudyID": {
-          "type": "keyword"
-        },
-        "name": {
-            "type": "text",
-            "analyzer": "pinyin_analyzer",
-            "fields": {
-                "suggest": {
-                    "type": "search_as_you_type",
-                    "analyzer": "pinyin_analyzer"
-                }
-            }
-        },
-        "PatientSex": {
-          "type": "keyword"
-        },
-        "PatientID": {
-          "type": "keyword"
-        },
-        "PatientAge": {
+      "mappings": {
+        "dynamic": "true",
+        "subobjects": true,
+        "dynamic_templates": [],
+        "date_detection": false,
+        "numeric_detection": false,
+        "properties": {
+          "AccessionNumber": {
+            "type": "keyword"
+          },
+          "PatientAge": {
             "type": "text"
-        },
-        "StudyDescription": {
-          "type": "text"
-        },
-        "StudyInstanceUID": {
-          "type": "keyword"
-        },
-        "StudyDate": {
+          },
+          "PatientID": {
+            "type": "keyword"
+          },
+          "PatientSex": {
+            "type": "keyword"
+          },
+          "StudyDate": {
             "type": "date",
             "format": "basic_date"
-        },
-        "AccessionNumber": {
-          "type": "keyword"
+          },
+          "StudyDescription": {
+            "type": "text"
+          },
+          "StudyID": {
+            "type": "keyword"
+          },
+          "StudyInstanceUID": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text",
+            "fields": {
+              "suggest": {
+                "type": "completion",
+                "analyzer": "pinyin_analyzer",
+                "preserve_separators": true,
+                "preserve_position_increments": true,
+                "max_input_length": 50
+              }
+            },
+            "analyzer": "pinyin_analyzer"
+          }
         }
       },
-      "subobjects": true
+      "aliases": {}
     }
-  },
-  "index_patterns": [
-    "dicom"
-  ],
-  "composed_of": []
-}
+  }
+
+
+  {
+    "StudyID": "AC987",
+    "PatientSex": "female",
+    "PatientID": "another",
+    "PatientAge": "36Y",
+    "StudyDescription": "another body",
+    "StudyInstanceUID": "sopid987",
+    "AccessionNumber": "867",
+    "name": "张小军",
+    "StudyDate": "20240318"
+  }
+  {
+    "StudyID": "AC123",
+    "PatientSex": "male",
+    "PatientID": "one",
+    "PatientAge": "34Y",
+    "StudyDescription": "neck test",
+    "StudyInstanceUID": "sopid2222",
+    "AccessionNumber": "234",
+    "name": "刘德华",
+    "StudyDate": "20240212"
+  }
+  {
+    "StudyID": "xx123",
+    "PatientSex": "male",
+    "PatientID": "23",
+    "PatientAge": "43Y",
+    "StudyDescription": "head test",
+    "StudyInstanceUID": "sopid111",
+    "AccessionNumber": "886",
+    "name": "王春红",
+    "StudyDate": "20240805"
+  }
