@@ -17,6 +17,7 @@ import {
 } from "@elastic/react-search-ui";
 import { Layout } from "@elastic/react-search-ui-views";
 import "@elastic/react-search-ui-views/lib/styles/styles.css";
+import moment from "moment";
 
 
 const connector = new ElasticsearchAPIConnector({
@@ -30,8 +31,7 @@ const config = {
   searchQuery: {
     search_fields: {
       StudyDescription: {},
-      name: {},
-      AccessionNumber: {}
+      name: {weight: 3}
     },
     result_fields: {
       name:{
@@ -45,27 +45,52 @@ const config = {
       },
       StudyInstanceUID: {
         snippet: {}
-      }
+      },
+      StudyDate:{ raw:{}}
     },
-    disjunctiveFacets: ["PatientSex"],
+    disjunctiveFacets: ["PatientSex", "StudyDate"],
     facets: {
-      "PatientSex": {type: "value"}
+      PatientSex: {type: "value"},
+      StudyDate: {
+        type: "range",
+        ranges: [
+          {
+            from: moment().subtract(1, 'days').format('YYYY-MM-DD'),
+            to: moment().format('YYYY-MM-DD'),
+            name: "Within the last 1 day"
+          },
+          {
+            from: moment().subtract(1, 'weeks').format('YYYY-MM-DD'),
+            to: moment().subtract(1, 'days').format('YYYY-MM-DD'),
+            name: "Within the last 1 week"
+          },
+          {
+            from: moment().subtract(1, 'months').format('YYYY-MM-DD'),
+            to: moment().subtract(1, 'weeks').format('YYYY-MM-DD'),
+            name: "Winthin the last 1 month"
+          },
+          {
+            to: moment().subtract(1, 'months').format('YYYY-MM-DD'),
+            name: "More than 1 month ago"
+          }
+        ]
+      }
     }
   },
   autocompleteQuery: {
-    results: {
-      resultsPerPage: 5,
-      // search_fields: {
-      //   "name": {
-      //     weight: 3
-      //   }
-      // },
-      result_fields: {
-        name: {
-          raw: {}
-        }
-      }
-    },
+    // results: {
+    //   resultsPerPage: 5,
+    //   search_fields: {
+    //     "name": {
+    //       weight: 3
+    //     }
+    //   },
+    //   result_fields: {
+    //     name: {
+    //       raw: {}
+    //     }
+    //   }
+    // },
     suggestions: {
       types: {
         "documents": { fields: ["name.suggest"] }
@@ -77,7 +102,38 @@ const config = {
   alwaysSearchOnInitialLoad: true
 };
 
+const SORT_OPTIONS = [
+  // {
+  //   name: "State -> Title",
+  //   value: [
+  //     {
+  //       field: "states",
+  //       direction: "asc"
+  //     },
+  //     {
+  //       field: "title",
+  //       direction: "asc"
+  //     }
+  //   ]
+  // }
+  {
+    name: "Relevance",
+    value: []
+  },
+  {
+    name: "StudyDate",
+    value: [
+      {
+        field: "StudyDate",
+        direction: "desc"
+      }
+    ]
+  }
+];
+
 const driver = new SearchDriver(config);
+
+console.log(moment().subtract(1, 'days').format('YYYY-MM-DD'));
 
 driver.subscribeToStateChanges((state) =>
   console.log(`Received ${state.totalResults} results for your search!`)
@@ -102,14 +158,18 @@ export default function Home() {
                     //   urlField: "StudyInstanceUID",
                     //   shouldTrackClickThrough: true
                     // }}
-                    autocompleteSuggestions={true}
+                    autocompleteSuggestions={{sectionTitle: "Suggested Queries"}}
                     debounceLength={200}
                   />
                 }
                 sideContent={
                   <div>
-                    {wasSearched && <Sorting label={"Sort by"} sortOptions={[]} />}
-                    <Facet key={"1"} field={"PatientSex"} label={"Sex"} />
+                    {wasSearched && <Sorting label={"Sort by"} sortOptions={SORT_OPTIONS}/>}
+                    <Facet field={"PatientSex"} label={"Sex"} />
+                    <Facet 
+                        field={"StudyDate"}
+                        label="Date Established"
+                      />
                   </div>
                 }
                 bodyContent={<Results shouldTrackClickThrough={true} />}
