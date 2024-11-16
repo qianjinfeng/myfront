@@ -66,7 +66,7 @@ PUT _index_template/template_dicom
             }
           }
         },
-        "name": {
+        "title": {
           "type": "text",
           "fields": {
             "suggest": {
@@ -92,9 +92,9 @@ PUT _index_template/template_dicom
 
 PUT /dicom/_bulk
 { "index": {}}
-{"StudyID": "AC987","PatientSex": "female", "PatientID": "another","PatientAge": "36Y", "StudyDescription":"another body","StudyInstanceUID": "sopid987", "AccessionNumber": "867","name": "张小军", "StudyDate":"2024-03-18"}
+{"StudyID": "AC987","PatientSex": "female", "PatientID": "another","PatientAge": "36Y", "StudyDescription":"another body","StudyInstanceUID": "sopid987", "AccessionNumber": "867","title": "张小军", "StudyDate":"2024-03-18"}
 
-{  "StudyID": "AC123",  "PatientSex": "male",   "PatientID": "one",   "PatientAge": "34Y",   "StudyDescription": "neck test",    "StudyInstanceUID": "sopid2222",    "AccessionNumber": "234",    "name":"刘德华",    "StudyDate": "2024-02-12"  }
+{  "StudyID": "AC123",  "PatientSex": "male",   "PatientID": "one",   "PatientAge": "34Y",   "StudyDescription": "neck test",    "StudyInstanceUID": "sopid2222",    "AccessionNumber": "234",    "title":"刘德华",    "StudyDate": "2024-02-12"  }
   {
     "StudyID": "xx123",
     "PatientSex": "male",
@@ -103,6 +103,6 @@ PUT /dicom/_bulk
     "StudyDescription": "head test",
     "StudyInstanceUID": "sopid111",
     "AccessionNumber": "886",
-    "name": "王春红",
+    "title": "王春红",
     "StudyDate": "20240805"
   }
